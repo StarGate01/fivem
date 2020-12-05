@@ -19,7 +19,7 @@ bool fwRefCountable::Release()
 
 	if (c <= 1)
 	{
-		//delete this; // YEA BOI LEAK THAT MEMORY 
+		//delete this; // TODO fix this memeory leak
 		return true;
 	}
 

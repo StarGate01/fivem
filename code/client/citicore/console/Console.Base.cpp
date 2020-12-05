@@ -169,7 +169,7 @@ void Printfv(ConsoleChannel channel, std::string_view format, fmt::printf_args a
 
 void DPrintfv(ConsoleChannel channel, std::string_view format, fmt::printf_args argList)
 {
-	//if (g_useDeveloper > 0)
+	//if (g_useDeveloper > 0) // TODO find a way to trigger this
 	//{
 		Printfv(channel, format, argList);
 	//}
