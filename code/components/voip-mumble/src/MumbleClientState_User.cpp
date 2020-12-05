@@ -86,7 +86,7 @@ void MumbleClientState::ProcessUserState(MumbleProto::UserState& userState)
 		std::unique_lock<std::shared_mutex> lock(m_usersMutex);
 
 		auto id = userState.session();
-		auto& userIt = m_users.find(id);
+		auto userIt = m_users.find(id);
 
 		if (userIt == m_users.end())
 		{

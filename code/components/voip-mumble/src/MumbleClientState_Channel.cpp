@@ -57,7 +57,7 @@ void MumbleClientState::ProcessChannelState(MumbleProto::ChannelState& channelSt
 	{
 		// is this an update to a channel we know?
 		auto id = channelState.channel_id();
-		auto& channelIt = m_channels.find(id);
+		auto channelIt = m_channels.find(id);
 
 		if (channelIt == m_channels.end())
 		{
