@@ -81,6 +81,8 @@ void MumbleClient::Initialize()
 						m_rng,
 						Botan::TLS::Server_Information()
 						);
+
+					console::DPrintf("Mumble", "TLS connected\n");
 				}
 				catch (std::exception& e)
 				{
@@ -154,7 +156,10 @@ void MumbleClient::Initialize()
 			m_tcp->connect(*address.GetSocketAddress());
 			m_state.Reset();
 			m_state.SetClient(this);
-			m_state.SetUsername(ToWide(m_connectionInfo.username));
+			std::wstring uname = ToWide(m_connectionInfo.username);
+			m_state.SetUsername(uname);
+			std::wstring pw = ToWide(m_connectionInfo.password);
+			m_state.SetPassword(pw);
 		});
 
 		m_idleTimer = m_loop->Get()->resource<uvw::TimerHandle>();
@@ -375,10 +380,11 @@ void MumbleClient::Initialize()
 	m_audioOutput.SetClient(this);
 }
 
-concurrency::task<MumbleConnectionInfo*> MumbleClient::ConnectAsync(const net::PeerAddress& address, const std::string& userName)
+concurrency::task<MumbleConnectionInfo*> MumbleClient::ConnectAsync(const net::PeerAddress& address, const std::string& userName, const std::string& password)
 {
 	m_connectionInfo.address = address;
 	m_connectionInfo.username = userName;
+	m_connectionInfo.password = password;
 
 	m_curManualChannel = "Root";
 
@@ -392,7 +398,10 @@ concurrency::task<MumbleConnectionInfo*> MumbleClient::ConnectAsync(const net::P
 	memset(m_tcpPings, 0, sizeof(m_tcpPings));
 
 	m_state.SetClient(this);
-	m_state.SetUsername(ToWide(userName));
+	std::wstring uname = ToWide(userName);
+	m_state.SetUsername(uname);
+	std::wstring pw = ToWide(password);
+	m_state.SetPassword(pw);
 
 	m_loop->EnqueueCallback([this]()
 	{
@@ -1012,7 +1021,7 @@ void MumbleClient::OnActivated()
 	ourVersion.set_version(0x00010204);
 	ourVersion.set_os("Windows");
 	ourVersion.set_os_version("Cfx/Embedded");
-	ourVersion.set_release("CitizenFX Client");
+	ourVersion.set_release("libfivemumble Client");
 
 	this->Send(MumbleMessageType::Version, ourVersion);
 }
