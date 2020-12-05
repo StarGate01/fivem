@@ -589,7 +589,7 @@ void MumbleAudioOutput::HandleClientConnect(const MumbleUser& user)
 	voice->Start();
 
 	// disable volume initially, we will only set it once we get position data from the client
-	voice->SetVolume(0.0f);
+	voice->SetVolume(0.0f); // TODO change here?
 
 	state->voice = voice;
 
@@ -1033,9 +1033,14 @@ void MumbleAudioOutput::ThreadFunc()
 	mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
 
 	// initialize COM for the current thread
-	CoInitialize(nullptr);
+	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr))
+	{
+		trace("%s: failed CoInitializeEx\n", __func__);
+		return;
+	}
 
-	HRESULT hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_INPROC_SERVER, IID_IMMDeviceEnumerator, (void**)m_mmDeviceEnumerator.GetAddressOf());
+	hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_INPROC_SERVER, IID_IMMDeviceEnumerator, (void**)m_mmDeviceEnumerator.GetAddressOf());
 
 	if (FAILED(hr))
 	{
@@ -1212,12 +1217,18 @@ void MumbleAudioOutput::InitializeAudioDevice()
 
 	if (xa2Dll)
 	{
+		console::DPrintf("Mumble", "XAudio2_8 loaded\n");
+
 		auto _XAudio2Create = (decltype(&XAudio2Create))GetProcAddress(xa2Dll, "XAudio2Create");
 
 		if (FAILED(_XAudio2Create(m_xa2.ReleaseAndGetAddressOf(), 0, 1)))
 		{
 			trace("%s: failed XA2.8 create\n", __func__);
 			return;
+		}
+		else
+		{
+			console::DPrintf("Mumble", "XA2.8 created\n");
 		}
 
 		_CreateAudioReverb = (decltype(&CreateAudioReverb))GetProcAddress(xa2Dll, "CreateAudioReverb");
@@ -1230,6 +1241,10 @@ void MumbleAudioOutput::InitializeAudioDevice()
 		{
 			trace("Could not load any XAudio DLL.\n");
 			return;
+		}
+		else
+		{
+			console::DPrintf("Mumble", "XAudio2_7 loaded\n");
 		}
 
 		m_xa2 = WRL::Make<XAudio2DownlevelWrap>();
@@ -1260,7 +1275,8 @@ void MumbleAudioOutput::InitializeAudioDevice()
 
 	CoTaskMemFree(deviceId);
 
-	if (FAILED(m_xa2->CreateMasteringVoice(&m_masteringVoice, 0, 48000, 0, deviceIdStr.c_str())))
+ 	HRESULT res = m_xa2->CreateMasteringVoice(&m_masteringVoice, 0, 48000, 0, deviceIdStr.c_str());
+	if (FAILED(res))
 	{
 		trace("%s: failed CreateMasteringVoice\n", __func__);
 		return;
@@ -1364,6 +1380,7 @@ void MumbleAudioOutput::InitializeAudioDevice()
 	}
 }
 
+/*
 // temp scrbind
 #include <scrBind.h>
 
@@ -1459,3 +1476,5 @@ static InitFunction initFunctionScript([]()
 		.AddMethod("AUDIOPARAM_SET_VALUE_CURVE_AT_TIME", &lab::AudioParam::setValueCurveAtTime)
 		.AddDestructor("AUDIOPARAM_DESTROY");
 });
+
+*/
