@@ -589,7 +589,7 @@ void MumbleAudioOutput::HandleClientConnect(const MumbleUser& user)
 	voice->Start();
 
 	// disable volume initially, we will only set it once we get position data from the client
-	voice->SetVolume(0.0f); // TODO change here?
+	voice->SetVolume(1.0f); // TODO changed
 
 	state->voice = voice;
 
