@@ -1275,11 +1275,16 @@ void MumbleAudioOutput::InitializeAudioDevice()
 
 	CoTaskMemFree(deviceId);
 
+	std::string dev = ToNarrow(deviceIdStr);
  	HRESULT res = m_xa2->CreateMasteringVoice(&m_masteringVoice, 0, 48000, 0, deviceIdStr.c_str());
 	if (FAILED(res))
 	{
-		trace("%s: failed CreateMasteringVoice\n", __func__);
+		console::DPrintf("Mumble", "Failed CreateMasteringVoice for %s\n", dev.c_str());
 		return;
+	}
+	else
+	{
+		console::DPrintf("Mumble", "Success CreateMasteringVoice for %s\n", dev.c_str());
 	}
 
 	m_masteringVoice->SetVolume(m_volume);
