@@ -8,6 +8,7 @@
 #include "StdInc.h"
 #include "MumbleClientImpl.h"
 #include "MumbleMessageHandler.h"
+#include <CoreConsole.h>
 
 DEFINE_HANDLER(UserState)
 {
@@ -36,6 +37,12 @@ DEFINE_HANDLER(ServerSync)
 	client->Send(MumbleMessageType::UserState, state);
 
 	client->MarkConnected();
+});
+
+DEFINE_HANDLER(TextMessage)
+{
+	auto client = MumbleClient::GetCurrent();
+	console::DPrintf("Mumble", "Message by %d: %s\n", data.actor(), data.message());
 });
 
 DEFINE_HANDLER(Ping)
